@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+
+import requests
+import json
+import sys
+import argparse
+import sys 
+
+
+target='SENSOR_DISTANCE'
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-V", "--version", help="show version", action="store_true")
+parser.add_argument("-v", "--verbose", help="verbose", action="store_true")
+parser.add_argument("-H", "--host", help="name or ip of server host",  default="fake.news.com")
+parser.add_argument("-O", "--open", help="distance for open door (gt)", type=int, default=50)
+parser.add_argument("-t", "--timeout", help="plugin timeout", type=int, default=5)
+parser.add_argument("-c", "--critical", help="critical threshold, ignored", type=int, default=50)
+parser.add_argument("-w", "--warning", help="warning threshold, ignored", type=int, default=50)
+args = parser.parse_args()
+
+dopen = args.open 
+host = args.host  
+dtimeout = 5 if args.timeout > 20 or args.timeout < 3  else args.timeout
+
+if args.version:
+    print("check_sensor_distance - version 1.0a") 
+    sys.exit(0)
+
+if host == "fake.news.com":
+    print(target,"UNKNOWN: hostname name required") 
+    sys.exit(3)
+
+
+def poll():
+    try: 
+        edurl = 'http://' + host + '/distance/get' 
+        response = requests.get(edurl,timeout=dtimeout) 
+        sensor =  json.loads(response.text) 
+
+        if ( sensor['get'] == 1 and sensor['sensor'] == 'distance' ):
+            if ( sensor['distance'] == 0 ):
+                print(target,"UNKNOWN: %3d cm macaddr %s | distance=%d " % (sensor['distance'], sensor['mac'],sensor['distance'])) 
+                sys.exit(3) 
+            if ( sensor['distance'] <= dopen ):
+                print(target,"CRITICAL: Door Open %3d cm macaddr %s | distance=%d " % (sensor['distance'], sensor['mac'],sensor['distance'])) 
+                sys.exit(2) 
+            else:
+                print(target,"OK: Door Closed %3d cm macaddr %s | distance=%d " % (sensor['distance'], sensor['mac'],sensor['distance'])) 
+                sys.exit(0) 
+        else:
+            print(target,"UNKNOWN:  invalid response or no reply") 
+            sys.exit(3) 
+    except requests.exceptions.RequestException as e:
+        print(target,"UNKNOWN:  exception %s" % (e)) 
+        sys.exit(3) 
+    except KeyError as e:
+        print(target,"UNKNOWN:  exception key error%s" % (e)) 
+        sys.exit(3) 
+    except Exception as e:
+        print(target,"UNKNOWN:  exception %s" % (e)) 
+        sys.exit(3) 
+   
+
+poll() 
+
