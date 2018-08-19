@@ -20,6 +20,10 @@ The ESP201 module requires an external resistor, button, and switch for performi
 the ESP201 module, as well as dual power supply, and 5v to 3.3v level shifting for 
 the Ultrasonic module. 
 
+The device software also includes Over-The-Air (OTA) firmware updates.  Install the `php` script (tools/esp8266 directory) to an Apache server, and copy the desired .ino.bin file, and update the script to include the
+device MAC address and firmware name.  You can then use the '/distance/updatefirmware' api query to
+load the new firmware and reboot automatically.  
+
 
 ## Features
 
@@ -27,6 +31,7 @@ the Ultrasonic module.
 + http query/response with JSON responses (ReST format)
 + WiFi interface and automatic association
 + helper scripts for command line queries and Nagios integration
++ OTA updates feature - remotely update firmware (http server using php script) 
 
 ## Protocol
 
@@ -39,7 +44,7 @@ Response:
    "ssid": "mygateway", 
    "rssi": -81, 
    "mac": "5c:6a:e:7f:cf:55", 
-   "version": "1.0b", 
+   "version": "1.1g", 
    "sensor": "distance"
 }
 ```
@@ -51,7 +56,29 @@ Response:
 {  "get": 1,
    "distance": 304,
    "mac": "5c:6a:e:7f:cf:5c",
-   "version": "1.0b", 
+   "version": "1.1g", 
+   "sensor": "distance"
+}
+```
+
+Query: http://<ip address>[:80]/distance/updatefirmware
+
+Response:
+```json
+{  "update": 1,
+   "ipaddr": "192.168.20.10", 
+   "mac": "5c:6a:e:7f:cf:5c",
+   "version": "1.0g", 
+   "sensor": "distance"
+}
+```
+
+Invalid Response:
+```json
+{  "invalid": 1,
+   "request": "GET /distance/invalid", 
+   "mac": "5c:6a:e:7f:cf:5c",
+   "version": "1.0g", 
    "sensor": "distance"
 }
 ```
