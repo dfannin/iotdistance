@@ -2,7 +2,7 @@
 #include <ESP8266httpUpdate.h>
 #include <ArduinoJson.h>
 
-#define SWVER "1.1g"
+#define SWVER "1.1h"
 
 #define PIN_ECHO 13
 #define PIN_TRIG 12
@@ -107,7 +107,7 @@ void loop()
   } else {
     Serial.println("invalid request") ;
     response += "{ \"invalid\": 1" ;
-    response += ", { \"request\": \"" ;
+    response += ", \"request\": \"" ;
     response += RawJson(request) ; 
     response += "\"" ; 
   }
