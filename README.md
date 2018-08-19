@@ -1,5 +1,5 @@
 # iotdistance
-IOT Distance Sensor for ESP8266 (ESP201) Wireless 
+IOT Distance Sensor for ESP8266 (ESP201) with OTA and WiFi
 
 ## Introduction
 
@@ -20,7 +20,7 @@ The ESP201 module requires an external resistor, button, and switch for performi
 the ESP201 module, as well as dual power supply, and 5v to 3.3v level shifting for 
 the Ultrasonic module. 
 
-The device software also includes Over-The-Air (OTA) firmware updates.  Install the `php` script (tools/esp8266 directory) to an Apache server, and copy the desired .ino.bin file, and update the script to include the
+The device software also includes Over-The-Air (OTA) firmware updates.  Install the `php` script (`tools/esp8266` directory) to an Apache server, and copy the desired .ino.bin file, and update the script to include the
 device MAC address and firmware name.  You can then use the '/distance/updatefirmware' api query to
 load the new firmware and reboot automatically.  
 
@@ -49,7 +49,7 @@ Response:
 }
 ```
 
-Query: http://<ip address>[:80]/distance/get
+Query: `http://<ip address>[:80]/distance/get`
 
 Response:
 ```json
@@ -61,7 +61,7 @@ Response:
 }
 ```
 
-Query: http://<ip address>[:80]/distance/updatefirmware
+Query: `http://<ip address>[:80]/distance/updatefirmware`
 
 Response:
 ```json
@@ -73,7 +73,7 @@ Response:
 }
 ```
 
-Invalid Response:
+Invalid Response (unknown query):
 ```json
 {  "invalid": 1,
    "request": "GET /distance/invalid", 
@@ -103,6 +103,36 @@ The firmware loading procedure:
 The IoT device should then associate with the network, and
 get an ip address.  The device also responds to ping messages (ICMP).
 
+### Setting up the OTA server 
+
+An optional Over-The-Air (OTA) server can be setup to allow remote firmware upgrades. Note that this version of the OTA server does not have any security or authentication, so use in a production environment is not recommended.  
+
+To setup the OTA server:
+
++ Setup an Apache Web Server with PHP 7.0+ (`<fwhost>`.
++ create a firmware directory on the server:  
+    `mkdir /var/www/html/esp8266`
++ copy the `firmware-latest.php` and `device.ini` files  
+    `cp tools/esp8266/firmware-latest.php /var/www/html/esp8266`  
+    `cp tools/esp8266/device.ini /var/www/html/esp8266`  
+    test the script by running (using Linux GET command) :  
+    `GET http://<fwhost>/esp8266/firmware-latest.php`  
+    correct response:  
+    `only for ESP8266 updater!`  
++ edit the `device.ini` file and add your device mac address and firmware .bin file name.
++ cp the new firmware bin file to firmware directory:  
+    Note: the .bin file is in your build/ directory.
+    `cp iotdistance.ino.bin /var/www/html/esp8266`
+
+To use the OTA server:  
+Once the device is loaded with the initial firmware, further upgrades can
+be performed remotely by doing:
+
++ call the upgradefirmware query on the device:  
+    `http://<device ip addr/distance/upgradefirmware`  
+    You should get a `upgrade` response (see above) and the device should 
+    disconnect, load the new firmware, and reboot.   
+    Wait a bit (30 seconds), and run a `info` query to verify.
 
 ## References
 

@@ -2,7 +2,7 @@
 #include <ESP8266httpUpdate.h>
 #include <ArduinoJson.h>
 
-#define SWVER "1.1h"
+#define SWVER "1.1i"
 
 #define PIN_ECHO 13
 #define PIN_TRIG 12

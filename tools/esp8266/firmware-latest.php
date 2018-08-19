@@ -1,10 +1,7 @@
 <?php
 
-$db = array(
-    "5C:CF:7F:0E:6A:5F" => "iotdistance.ino",
-    "5C:CF:7F:0E:6A:5C" => "iotdistance.ino",
-    "5C:CF:7F:0E:6A:66" => "iotdistance.ino",
-);
+// device file
+$db = parse_ini_file("device.ini") ; 
 
 header('Content-type: text/plain; charset=utf8',true) ;
 
